@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibe/core/theme/cubit/theme_cubit.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_bloc.dart';
 import 'package:vibe/features/connections/presentation/widgets/add_connection_dialog.dart';
 import 'package:vibe/features/connections/presentation/widgets/connection_list.dart';
@@ -24,7 +25,19 @@ class _ConnectionPageState extends State<ConnectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Vibe Connections"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text("Vibe Connections"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<ThemeCubit>().toggleTheme();
+            },
+            icon: Icon(Icons.brightness_6_outlined),
+            tooltip: 'Toggle Theme',
+          ),
+        ],
+      ),
       body: BlocConsumer<ConnectionBloc, ConnectionState>(
         listener: (context, state) {
           if (state is ConnectionSuccess) {
