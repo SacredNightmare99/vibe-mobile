@@ -19,7 +19,7 @@ class _TerminalPageState extends State<TerminalPage> {
     terminal = Terminal(platform: TerminalTargetPlatform.linux);
     context.read<TerminalBloc>().add(StartSession());
     terminal.onOutput = (output) {
-      context.read<TerminalBloc>().add(SendCommand(output));
+      context.read<TerminalBloc>().add(SendCommandEvent(output));
     };
     terminal.onResize = (width, height, pixelWidth, pixelHeight) {
       context.read<TerminalBloc>().add(TerminalResized(width, height));
@@ -39,7 +39,12 @@ class _TerminalPageState extends State<TerminalPage> {
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TerminalView(terminal),
+            child: TerminalView(
+              terminal,
+              autofocus: true,
+              autoResize: true,
+              textStyle: TerminalStyle(fontSize: 9),
+            ),
           ),
         ),
       ),

@@ -20,5 +20,33 @@ class Connection extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, name, host, port, username, password, privateKey];
+  List<Object?> get props => [
+    id,
+    name,
+    host,
+    port,
+    username,
+    password,
+    privateKey,
+  ];
+
+  Connection copyWith({
+    String? id,
+    String? name,
+    String? host,
+    int? port,
+    String? username,
+    String? password,
+    String? privateKey,
+  }) {
+    return Connection(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      host: host ?? this.host,
+      port: port ?? this.port,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      privateKey: privateKey ?? this.privateKey,
+    );
+  }
 }

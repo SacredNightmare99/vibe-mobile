@@ -7,7 +7,16 @@ abstract class ConnectionState extends Equatable {
   List<Object> get props => [];
 }
 
-class ConnectionInitial extends ConnectionState {}
+class ConnectionListLoading extends ConnectionState {}
+
+class ConnectionListLoaded extends ConnectionState {
+  final List<Connection> connections;
+
+  const ConnectionListLoaded({this.connections = const []});
+
+  @override
+  List<Object> get props => [connections];
+}
 
 class ConnectionLoading extends ConnectionState {}
 
@@ -21,4 +30,3 @@ class ConnectionFailure extends ConnectionState {
   @override
   List<Object> get props => [message];
 }
-

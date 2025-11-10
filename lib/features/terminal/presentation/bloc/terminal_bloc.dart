@@ -1,66 +1,69 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibe/core/network/ssh_manager.dart';
-import 'package:vibe/core/network/ssh_session.dart';
+import 'package:vibe/features/terminal/domain/usecases/listen_terminal_output.dart';
+import 'package:vibe/features/terminal/domain/usecases/resize_terminal.dart';
+import 'package:vibe/features/terminal/domain/usecases/send_command.dart';
+import 'package:vibe/features/terminal/domain/usecases/start_terminal_session.dart';
 
 part 'terminal_event.dart';
 part 'terminal_state.dart';
 
 class TerminalBloc extends Bloc<TerminalEvent, TerminalState> {
-  final SshManager _sshManager;
-  SshSession? _session;
-  StreamSubscription? _outputSubscription;
+  final StartTerminalSession _startSession;
+  final SendCommand _sendCommand;
+  final ResizeTerminal _resizeTerminal;
+  final ListenTerminalOutput _listenOutput;
 
-  TerminalBloc(this._sshManager) : super(TerminalIdle()) {
+  StreamSubscription? _outputSub;
+
+  TerminalBloc(
+    this._startSession,
+    this._sendCommand,
+    this._resizeTerminal,
+    this._listenOutput,
+  ) : super(TerminalIdle()) {
     on<StartSession>(_onStartSession);
-    on<SendCommand>(_onSendCommand);
+    on<SendCommandEvent>(_onSendCommand);
     on<TerminalResized>(_onTerminalResized);
-    on<_NewTerminalOutput>(_onNewTerminalOutput);
+    on<_NewOutputEvent>(_onNewOutput);
   }
 
   Future<void> _onStartSession(
     StartSession event,
     Emitter<TerminalState> emit,
   ) async {
-    if (_sshManager.isConnected) {
-      try {
-        _session = await _sshManager.startShellSession();
-
-        _outputSubscription?.cancel();
-        _outputSubscription = _session!.outputStream.listen((output) {
-          add(_NewTerminalOutput(output));
-        });
-
-        _session!.write("vibe watch &\n");
-        _session!.write("gemini\n");
-      } catch (e) {
-        emit(TerminalOutputUpdated("Error starting shell: ${e.toString()}\n"));
-      }
-    } else {
-      emit(TerminalOutputUpdated("Not Connected.\n"));
+    try {
+      await _startSession();
+      _outputSub = _listenOutput().listen((output) {
+        add(_NewOutputEvent(output.data));
+      });
+    } catch (e) {
+      emit(TerminalOutputUpdated("Error: ${e.toString()}\n"));
     }
   }
 
-  void _onNewTerminalOutput(
-    _NewTerminalOutput event,
+  Future<void> _onSendCommand(
+    SendCommandEvent event,
     Emitter<TerminalState> emit,
-  ) {
+  ) async {
+    await _sendCommand(event.command);
+  }
+
+  Future<void> _onTerminalResized(
+    TerminalResized event,
+    Emitter<TerminalState> emit,
+  ) async {
+    await _resizeTerminal(event.width, event.height);
+  }
+
+  void _onNewOutput(_NewOutputEvent event, Emitter<TerminalState> emit) {
     emit(TerminalOutputUpdated(event.output));
   }
 
-  void _onTerminalResized(TerminalResized event, Emitter<TerminalState> emit) {
-    _session?.resize(event.width, event.height);
-  }
-
-  void _onSendCommand(SendCommand event, Emitter<TerminalState> emit) {
-    _session?.write(event.command);
-  }
-
   @override
-  Future<void> close() {
-    _outputSubscription?.cancel();
-    _session?.close();
+  Future<void> close() async {
+    await _outputSub?.cancel();
     return super.close();
   }
 }
