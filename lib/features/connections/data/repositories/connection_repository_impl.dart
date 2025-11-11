@@ -1,42 +1,26 @@
+import 'package:hive/hive.dart';
 import 'package:vibe/core/network/ssh_manager.dart';
+import 'package:vibe/features/connections/data/models/connection_model.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
 import 'package:vibe/features/connections/domain/repositories/connection_repository.dart';
 
 class ConnectionRepositoryImpl implements ConnectionRepository {
   final SshManager sshManager;
+  final Box<ConnectionModel> connectionBox;
 
-  // For now, simulate persistence
-  final List<Connection> _savedConnections = [
-    const Connection(
-      id: '1',
-      name: 'Localhost (Emulator)',
-      host: '10.0.2.2',
-      port: 22,
-      username: 'sacred',
-    ),
-    const Connection(
-      id: '2',
-      name: 'Dev Server',
-      host: 'dev.example.com',
-      port: 22,
-      username: 'dev',
-    ),
-  ];
-
-  ConnectionRepositoryImpl(this.sshManager);
+  ConnectionRepositoryImpl(this.sshManager, this.connectionBox);
 
   @override
   Future<List<Connection>> getAllConnections() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return List.unmodifiable(_savedConnections);
+    return connectionBox.values.map((model) => model.toEntity()).toList();
   }
 
   @override
   Future<void> addConnection(Connection connection) async {
-    final newConnection = connection.copyWith(
+    final newConnectionModel = ConnectionModel.fromEntity(connection).copyWith(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
     );
-    _savedConnections.add(newConnection);
+    await connectionBox.put(newConnectionModel.id, newConnectionModel);
   }
 
   @override

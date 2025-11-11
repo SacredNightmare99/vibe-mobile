@@ -18,6 +18,9 @@ dependencies:
   dartssh2: ^2.13.0
   xterm: ^4.0.0
   equatable: ^2.0.7
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  build_runner: ^2.4.13
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +29,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   bloc_test: ^10.0.0
+  hive_generator: ^2.0.1
 
 
 # The following section is specific to Flutter packages.

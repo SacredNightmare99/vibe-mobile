@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart' hide ConnectionState;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibe/core/theme/cubit/theme_cubit.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_bloc.dart';
 import 'package:vibe/features/connections/presentation/widgets/add_connection_dialog.dart';
 import 'package:vibe/features/connections/presentation/widgets/connection_list.dart';
 import 'package:vibe/features/connections/presentation/widgets/loading_overlay.dart';
 import 'package:vibe/features/connections/presentation/widgets/password_prompt_dialog.dart';
+import 'package:vibe/features/settings/presentation/pages/settings_page.dart';
 import 'package:vibe/features/terminal/presentation/pages/terminal_page.dart';
 
 class ConnectionPage extends StatefulWidget {
@@ -33,10 +33,12 @@ class _ConnectionPageState extends State<ConnectionPage> {
           actions: [
             IconButton(
               onPressed: () {
-                context.read<ThemeCubit>().toggleTheme();
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
               },
-              icon: Icon(Icons.brightness_6_outlined),
-              tooltip: 'Toggle Theme',
+              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
             ),
           ],
         ),
