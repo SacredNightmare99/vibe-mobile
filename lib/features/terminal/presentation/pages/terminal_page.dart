@@ -28,10 +28,11 @@ class _TerminalPageState extends State<TerminalPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Terminal')),
-      body: SafeArea(
-        child: BlocListener<TerminalBloc, TerminalState>(
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Terminal')),
+        body: BlocListener<TerminalBloc, TerminalState>(
           listener: (context, state) {
             if (state is TerminalOutputUpdated) {
               terminal.write(state.output);

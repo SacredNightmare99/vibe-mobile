@@ -24,55 +24,58 @@ class _ConnectionPageState extends State<ConnectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Vibe Connections"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme();
-            },
-            icon: Icon(Icons.brightness_6_outlined),
-            tooltip: 'Toggle Theme',
-          ),
-        ],
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Vibe Connections"),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () {
+                context.read<ThemeCubit>().toggleTheme();
+              },
+              icon: Icon(Icons.brightness_6_outlined),
+              tooltip: 'Toggle Theme',
+            ),
+          ],
+        ),
+        body: BlocConsumer<ConnectionBloc, ConnectionState>(
+          listener: (context, state) {
+            if (state is ConnectionSuccess) {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const TerminalPage()));
+            } else if (state is ConnectionFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          buildWhen: (prev, curr) =>
+              curr is ConnectionListLoaded || curr is ConnectionListLoading,
+          builder: (context, state) {
+            if (state is ConnectionListLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is ConnectionListLoaded) {
+              return ConnectionList(
+                connections: state.connections,
+                onTap: (connection) => showPasswordPrompt(context, connection),
+              );
+            }
+            return const Center(child: Text('Loading...'));
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => showAddConnectionDialog(context),
+          child: const Icon(Icons.add),
+        ),
+        bottomSheet: const LoadingOverlay(),
       ),
-      body: BlocConsumer<ConnectionBloc, ConnectionState>(
-        listener: (context, state) {
-          if (state is ConnectionSuccess) {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const TerminalPage()));
-          } else if (state is ConnectionFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        buildWhen: (prev, curr) =>
-            curr is ConnectionListLoaded || curr is ConnectionListLoading,
-        builder: (context, state) {
-          if (state is ConnectionListLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is ConnectionListLoaded) {
-            return ConnectionList(
-              connections: state.connections,
-              onTap: (connection) => showPasswordPrompt(context, connection),
-            );
-          }
-          return const Center(child: Text('Loading...'));
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => showAddConnectionDialog(context),
-        child: const Icon(Icons.add),
-      ),
-      bottomSheet: const LoadingOverlay(),
     );
   }
 }
