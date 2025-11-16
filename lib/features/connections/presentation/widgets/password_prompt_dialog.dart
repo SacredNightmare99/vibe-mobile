@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
-import 'package:vibe/features/connections/presentation/bloc/connection_bloc.dart';
+import 'package:vibe/features/connections/presentation/bloc/connection_auth/connection_auth_bloc.dart';
 
 void showPasswordPrompt(BuildContext context, Connection connection) {
   final passwordController = TextEditingController();
@@ -23,8 +23,8 @@ void showPasswordPrompt(BuildContext context, Connection connection) {
           ),
           FilledButton(
             onPressed: () {
-              context.read<ConnectionBloc>().add(
-                ConnectRequested(
+              context.read<ConnectionAuthBloc>().add(
+                ConnectToSystemRequested(
                   connection: connection,
                   password: passwordController.text.trim(),
                 ),

@@ -34,7 +34,7 @@ class TerminalBloc extends Bloc<TerminalEvent, TerminalState> {
     Emitter<TerminalState> emit,
   ) async {
     try {
-      await _startSession();
+      await _startSession(event.projectPath);
       _outputSub = _listenOutput().listen((output) {
         add(_NewOutputEvent(output.data));
       });

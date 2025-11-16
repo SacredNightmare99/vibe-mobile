@@ -7,7 +7,9 @@ import 'package:vibe/features/connections/domain/usecases/add_connection.dart';
 import 'package:vibe/features/connections/domain/usecases/connect_to_system.dart';
 import 'package:vibe/features/connections/domain/usecases/disconnect_from_system.dart';
 import 'package:vibe/features/connections/domain/usecases/get_all_connections.dart';
-import 'package:vibe/features/connections/presentation/bloc/connection_bloc.dart';
+import 'package:vibe/features/connections/domain/usecases/get_vibe_config.dart';
+import 'package:vibe/features/connections/presentation/bloc/connection_auth/connection_auth_bloc.dart';
+import 'package:vibe/features/connections/presentation/bloc/connection_manager/connection_manager_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -26,7 +28,9 @@ Future<void> initConnectionsFeature() async {
   sl.registerLazySingleton(() => AddConnection(sl()));
   sl.registerLazySingleton(() => ConnectToSystem(sl()));
   sl.registerLazySingleton(() => DisconnectFromSystem(sl()));
+  sl.registerLazySingleton(() => GetVibeConfig(sl()));
 
   // Bloc
-  sl.registerFactory(() => ConnectionBloc(sl(), sl(), sl(), sl()));
+  sl.registerFactory(() => ConnectionManagerBloc(sl(), sl()));
+  sl.registerFactory(() => ConnectionAuthBloc(sl(), sl(), sl()));
 }

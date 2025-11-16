@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
-import 'package:vibe/features/connections/presentation/bloc/connection_bloc.dart';
+import 'package:vibe/features/connections/presentation/bloc/connection_manager/connection_manager_bloc.dart';
 
 void showAddConnectionDialog(BuildContext context) {
   final formKey = GlobalKey<FormState>();
@@ -61,7 +61,7 @@ void showAddConnectionDialog(BuildContext context) {
                   port: int.parse(portController.text.trim()),
                   username: userController.text.trim(),
                 );
-                context.read<ConnectionBloc>().add(
+                context.read<ConnectionManagerBloc>().add(
                   AddConnectionEvent(newConnection),
                 );
                 Navigator.of(dialogContext).pop();

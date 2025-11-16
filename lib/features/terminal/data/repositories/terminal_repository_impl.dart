@@ -15,7 +15,7 @@ class TerminalRepositoryImpl implements TerminalRepository {
   Stream<TerminalOutput> get outputStream => _controller.stream;
 
   @override
-  Future<void> startSession() async {
+  Future<void> startSession({String? projectPath}) async {
     if (!sshManager.isConnected) {
       throw Exception("SSH not connected");
     }
@@ -26,8 +26,11 @@ class TerminalRepositoryImpl implements TerminalRepository {
     });
 
     // send startup commands
-    _session!.write("vibe watch &\n");
-    _session!.write("gemini\n");
+    if (projectPath != null) {
+      _session!.write("cd $projectPath\n");
+    }
+    // _session!.write("vibe watch &\n");
+    // _session!.write("gemini\n");
   }
 
   @override
