@@ -4,7 +4,8 @@ import 'package:vibe/features/terminal/presentation/bloc/terminal_bloc.dart';
 import 'package:xterm/xterm.dart' hide TerminalState;
 
 class TerminalPage extends StatefulWidget {
-  const TerminalPage({super.key});
+  final String? projectPath;
+  const TerminalPage({super.key, this.projectPath});
 
   @override
   State<TerminalPage> createState() => _TerminalPageState();
@@ -16,8 +17,10 @@ class _TerminalPageState extends State<TerminalPage> {
   @override
   void initState() {
     super.initState();
-    terminal = Terminal(platform: TerminalTargetPlatform.linux);
-    context.read<TerminalBloc>().add(StartSession());
+    terminal = Terminal();
+    context.read<TerminalBloc>().add(
+      StartSession(projectPath: widget.projectPath),
+    );
     terminal.onOutput = (output) {
       context.read<TerminalBloc>().add(SendCommandEvent(output));
     };
@@ -44,7 +47,7 @@ class _TerminalPageState extends State<TerminalPage> {
               terminal,
               autofocus: true,
               autoResize: true,
-              textStyle: TerminalStyle(fontSize: 9),
+              textStyle: TerminalStyle(fontSize: 13.5, height: 1.15),
             ),
           ),
         ),

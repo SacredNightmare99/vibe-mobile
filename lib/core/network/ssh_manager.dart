@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:dartssh2/dartssh2.dart';
 import 'package:vibe/core/network/ssh_session.dart';
 
 class SshManager {
   SSHClient? _client;
+  String? _username;
 
   bool get isConnected => _client != null;
+  String? get username => _username;
 
   Future<void> connect({
     required String host,
@@ -26,10 +30,13 @@ class SshManager {
         onPasswordRequest: () => password,
       );
 
+      _username = username;
+
       await _client!.authenticated;
     } catch (e) {
       _client?.close();
       _client = null;
+      _username = null;
       rethrow;
     }
   }
@@ -37,6 +44,7 @@ class SshManager {
   Future<void> disconnect() async {
     _client?.close();
     _client = null;
+    _username = null;
   }
 
   Future<SshSession> startShellSession() async {
@@ -44,15 +52,25 @@ class SshManager {
       throw Exception('Not connected. Call connect() first.');
     }
 
-    // Start a shell with a PTY configuration
-    final session = await _client!.shell(
-      pty: SSHPtyConfig(
-        width: 80, // Initial width, will be resized by terminal
-        height: 25, // Initial height
-      ),
+    final session = await _client!.execute(
+      'bash',
+      pty: SSHPtyConfig(width: 80, height: 25),
     );
 
-    // Return our custom wrapper class for the session
     return SshSession(session);
+  }
+
+  Future<String?> readFile(String path) async {
+    if (!isConnected) {
+      throw Exception('Not Connected.');
+    }
+    try {
+      final sftp = await _client!.sftp();
+      final file = await sftp.open(path);
+      final content = await file.readBytes();
+      return utf8.decode(content);
+    } catch (e) {
+      return null;
+    }
   }
 }

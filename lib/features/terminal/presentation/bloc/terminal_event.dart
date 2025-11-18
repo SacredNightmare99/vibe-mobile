@@ -7,7 +7,10 @@ class SendCommandEvent extends TerminalEvent {
   SendCommandEvent(this.command);
 }
 
-class StartSession extends TerminalEvent {}
+class StartSession extends TerminalEvent {
+  final String? projectPath;
+  StartSession({this.projectPath});
+}
 
 class TerminalResized extends TerminalEvent {
   final int width;

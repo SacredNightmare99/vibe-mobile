@@ -1,0 +1,15 @@
+import 'package:equatable/equatable.dart';
+
+class Project extends Equatable {
+  final String name;
+  final String path;
+
+  const Project({required this.name, required this.path});
+
+  @override
+  List<Object?> get props => [name, path];
+
+  factory Project.fromJson(Map<String, dynamic> json) {
+    return Project(name: json['id'] as String, path: json['path'] as String);
+  }
+}

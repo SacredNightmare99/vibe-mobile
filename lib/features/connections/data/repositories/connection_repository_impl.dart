@@ -17,9 +17,9 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
 
   @override
   Future<void> addConnection(Connection connection) async {
-    final newConnectionModel = ConnectionModel.fromEntity(connection).copyWith(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+    final newConnectionModel = ConnectionModel.fromEntity(
+      connection,
+    ).copyWith(id: DateTime.now().millisecondsSinceEpoch.toString());
     await connectionBox.put(newConnectionModel.id, newConnectionModel);
   }
 
@@ -41,5 +41,12 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   @override
   Future<void> disconnect() async {
     await sshManager.disconnect();
+  }
+
+  @override
+  Future<String?> getVibeConfig() async {
+    return await sshManager.readFile(
+      '/home/${sshManager.username}/.vibe/tracked.json',
+    );
   }
 }
