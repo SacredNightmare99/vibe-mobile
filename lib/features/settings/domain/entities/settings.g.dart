@@ -17,7 +17,7 @@ class SettingsAdapter extends TypeAdapter<Settings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Settings(
-      themeMode: fields[0] as ThemeMode,
+      themeMode: fields[0] as AppThemeMode,
     );
   }
 

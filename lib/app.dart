@@ -5,6 +5,7 @@ import 'package:vibe/core/theme/app_theme.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_auth/connection_auth_bloc.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_manager/connection_manager_bloc.dart';
 import 'package:vibe/features/connections/presentation/pages/connection_page.dart';
+import 'package:vibe/features/settings/presentation/adapters/theme_mode_ui_adapter.dart';
 import 'package:vibe/features/settings/presentation/bloc/settings_bloc.dart';
 import 'package:vibe/features/terminal/presentation/bloc/terminal_bloc.dart';
 
@@ -23,8 +24,8 @@ class VibeApp extends StatelessWidget {
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
           final themeMode = state is SettingsLoaded
-              ? state.settings.themeMode
-              : ThemeMode.dark;
+              ? ThemeModeUIAdapter.toFlutter(state.settings.themeMode)
+              : ThemeMode.system;
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: "Vibe",

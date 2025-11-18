@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibe/features/settings/presentation/adapters/theme_mode_ui_adapter.dart';
 import 'package:vibe/features/settings/presentation/bloc/settings_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -20,7 +21,11 @@ class SettingsPage extends StatelessWidget {
                   children: [
                     SwitchListTile(
                       title: const Text('Dark Mode'),
-                      value: state.settings.themeMode == ThemeMode.dark,
+                      value:
+                          ThemeModeUIAdapter.toFlutter(
+                            state.settings.themeMode,
+                          ) ==
+                          ThemeMode.dark,
                       onChanged: (_) {
                         context.read<SettingsBloc>().add(ToggleTheme());
                       },
