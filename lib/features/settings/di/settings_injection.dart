@@ -6,12 +6,13 @@ import 'package:vibe/features/settings/domain/repositories/settings_repository.d
 import 'package:vibe/features/settings/domain/usecases/get_settings.dart';
 import 'package:vibe/features/settings/domain/usecases/save_settings.dart';
 import 'package:vibe/features/settings/presentation/bloc/settings_bloc.dart';
+import 'package:vibe/core/config/constants.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initSettingsFeature() async {
   //- Data sources
-  final settingsBox = await Hive.openBox<Settings>('settings');
+  final settingsBox = await Hive.openBox<Settings>(Constants.SETTINGS_BOX);
   sl.registerLazySingleton<Box<Settings>>(() => settingsBox);
 
   // Repository

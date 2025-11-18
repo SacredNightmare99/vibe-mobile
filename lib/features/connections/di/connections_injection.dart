@@ -11,17 +11,20 @@ import 'package:vibe/features/connections/domain/usecases/get_vibe_config.dart';
 import 'package:vibe/features/connections/domain/usecases/get_connected_username.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_auth/connection_auth_bloc.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_manager/connection_manager_bloc.dart';
+import 'package:vibe/core/config/constants.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initConnectionsFeature() async {
   //- Data sources
-  final connectionBox = await Hive.openBox<ConnectionModel>('connections');
+  final connectionBox = await Hive.openBox<ConnectionModel>(
+    Constants.CONNECTIONS_BOX,
+  );
   sl.registerLazySingleton<Box<ConnectionModel>>(() => connectionBox);
 
   // Repository
   sl.registerLazySingleton<ConnectionRepository>(
-    () => ConnectionRepositoryImpl(sl(), sl()),
+    () => ConnectionRepositoryImpl(sl(), sl(), sl()),
   );
 
   // Use cases

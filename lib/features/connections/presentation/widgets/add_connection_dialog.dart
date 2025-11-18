@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
 import 'package:vibe/features/connections/presentation/bloc/connection_manager/connection_manager_bloc.dart';
+import 'package:vibe/core/config/constants.dart';
 
 void showAddConnectionDialog(BuildContext context) {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final hostController = TextEditingController(text: '10.0.2.2');
-  final portController = TextEditingController(text: '22');
+  final portController = TextEditingController(
+    text: Constants.DEFAULT_SSH_PORT.toString(),
+  );
   final userController = TextEditingController();
 
   showDialog(

@@ -6,12 +6,14 @@ import 'package:vibe/features/connections/domain/repositories/connection_reposit
 import 'package:vibe/core/error/failure.dart';
 import 'package:vibe/core/error/exception.dart';
 import 'package:dartz/dartz.dart';
+import 'package:vibe/core/config/app_config.dart';
 
 class ConnectionRepositoryImpl implements ConnectionRepository {
   final SshManager sshManager;
   final Box<ConnectionModel> connectionBox;
+  final AppConfig appConfig;
 
-  ConnectionRepositoryImpl(this.sshManager, this.connectionBox);
+  ConnectionRepositoryImpl(this.sshManager, this.connectionBox, this.appConfig);
 
   @override
   Future<List<Connection>> getAllConnections() async {
@@ -55,7 +57,7 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   Future<Either<Failure, String>> getVibeConfig(String username) async {
     try {
       final configContent = await sshManager.readFile(
-        '/home/$username/.vibe/tracked.json',
+        AppConfig.forUser(username).vibeConfigFilePath,
       );
       return Right(configContent);
     } on SshException catch (e) {
