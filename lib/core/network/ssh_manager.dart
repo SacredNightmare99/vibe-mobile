@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:vibe/core/network/ssh_session.dart';
 import 'package:vibe/core/error/exception.dart';
+import 'package:vibe/core/config/constants.dart';
 
 class SshManager {
   SSHClient? _client;
@@ -50,7 +51,7 @@ class SshManager {
 
   Future<SshSession> startShellSession() async {
     if (!isConnected) {
-      throw const SshException(message: 'Not connected. Call connect() first.');
+      throw const SshException(message: Constants.ERROR_CONNECTION_NOT_ACTIVE);
     }
 
     final session = await _client!.execute(
@@ -63,7 +64,7 @@ class SshManager {
 
   Future<String> readFile(String path) async {
     if (!isConnected) {
-      throw const SshException(message: 'Not Connected.');
+      throw const SshException(message: Constants.ERROR_CONNECTION_NOT_ACTIVE);
     }
     try {
       final sftp = await _client!.sftp();
@@ -71,7 +72,9 @@ class SshManager {
       final content = await file.readBytes();
       return utf8.decode(content);
     } catch (e) {
-      throw SshException(message: 'Failed to read file $path: ${e.toString()}');
+      throw SshException(
+        message: '${Constants.ERROR_FILE_READ_FAILED} $path: ${e.toString()}',
+      );
     }
   }
 }

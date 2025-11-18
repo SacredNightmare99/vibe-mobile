@@ -2,18 +2,24 @@ import 'package:hive/hive.dart';
 import 'package:vibe/core/network/ssh_manager.dart';
 import 'package:vibe/features/connections/data/models/connection_model.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
+import 'package:vibe/features/connections/domain/entities/project.dart';
 import 'package:vibe/features/connections/domain/repositories/connection_repository.dart';
 import 'package:vibe/core/error/failure.dart';
 import 'package:vibe/core/error/exception.dart';
 import 'package:dartz/dartz.dart';
-import 'package:vibe/core/config/app_config.dart';
+import 'package:vibe/features/connections/data/datasources/connection_remote_data_source.dart';
+import 'package:vibe/core/config/constants.dart';
 
 class ConnectionRepositoryImpl implements ConnectionRepository {
   final SshManager sshManager;
   final Box<ConnectionModel> connectionBox;
-  final AppConfig appConfig;
+  final ConnectionRemoteDataSource remoteDataSource;
 
-  ConnectionRepositoryImpl(this.sshManager, this.connectionBox, this.appConfig);
+  ConnectionRepositoryImpl(
+    this.sshManager,
+    this.connectionBox,
+    this.remoteDataSource,
+  );
 
   @override
   Future<List<Connection>> getAllConnections() async {
@@ -54,21 +60,22 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   }
 
   @override
-  Future<Either<Failure, String>> getVibeConfig(String username) async {
+  Future<Either<Failure, List<Project>>> getVibeConfig() async {
     try {
-      final configContent = await sshManager.readFile(
-        AppConfig.forUser(username).vibeConfigFilePath,
+      final username = sshManager.username;
+      if (username == null) {
+        return const Left(
+          SshFailure(message: Constants.ERROR_USERNAME_NOT_AVAILABLE),
+        );
+      }
+      final projectModels = await remoteDataSource.getVibeConfigProjects(
+        username,
       );
-      return Right(configContent);
+      return Right(projectModels.map((model) => model.toEntity()).toList());
     } on SshException catch (e) {
       return Left(SshFailure(message: e.message));
     } catch (e) {
       return Left(SshFailure(message: e.toString()));
     }
-  }
-
-  @override
-  String? getConnectedUsername() {
-    return sshManager.username;
   }
 }
