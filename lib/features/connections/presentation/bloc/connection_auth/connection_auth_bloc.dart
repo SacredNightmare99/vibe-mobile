@@ -1,25 +1,30 @@
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibe/features/connections/data/models/project_model.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vibe/features/connections/domain/entities/project.dart';
 import 'package:vibe/features/connections/domain/usecases/connect_to_system.dart';
 import 'package:vibe/features/connections/domain/usecases/disconnect_from_system.dart';
 import 'package:vibe/features/connections/domain/usecases/get_vibe_config.dart';
+import 'package:vibe/features/connections/domain/usecases/get_connected_username.dart';
 
 part 'connection_auth_event.dart';
 part 'connection_auth_state.dart';
 
-class ConnectionAuthBloc extends Bloc<ConnectionAuthEvent, ConnectionAuthState> {
+class ConnectionAuthBloc
+    extends Bloc<ConnectionAuthEvent, ConnectionAuthState> {
   final ConnectToSystem _connectToSystem;
   final DisconnectFromSystem _disconnectFromSystem;
   final GetVibeConfig _getVibeConfig;
+  final GetConnectedUsername _getConnectedUsername;
 
   ConnectionAuthBloc(
     this._connectToSystem,
     this._disconnectFromSystem,
     this._getVibeConfig,
+    this._getConnectedUsername,
   ) : super(ConnectionAuthInitial()) {
     on<ConnectToSystemRequested>(_onConnectToSystemRequested);
     on<DisconnectFromSystemRequested>(_onDisconnectFromSystemRequested);
@@ -44,9 +49,20 @@ class ConnectionAuthBloc extends Bloc<ConnectionAuthEvent, ConnectionAuthState> 
     );
 
     if (success) {
+      final username = _getConnectedUsername();
+      if (username == null) {
+        await _disconnectFromSystem();
+        emit(
+          ConnectionAuthFailure(
+            'Failed to retrieve connected username. Disconnecting...',
+          ),
+        );
+        return;
+      }
+
       String? configContent;
       try {
-        configContent = await _getVibeConfig();
+        configContent = await _getVibeConfig(username);
       } catch (e) {
         await _disconnectFromSystem();
         emit(
@@ -69,7 +85,10 @@ class ConnectionAuthBloc extends Bloc<ConnectionAuthEvent, ConnectionAuthState> 
           final Map<String, dynamic> data = json.decode(configContent);
           final List<dynamic> projectsJson = data['projects'] ?? [];
           final projects = projectsJson
-              .map((p) => Project.fromJson(p as Map<String, dynamic>))
+              .map(
+                (p) =>
+                    ProjectModel.fromJson(p as Map<String, dynamic>).toEntity(),
+              )
               .toList();
           emit(ProjectSelection(projects: projects));
         } catch (e) {

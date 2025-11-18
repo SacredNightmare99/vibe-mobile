@@ -4,5 +4,5 @@ class GetVibeConfig {
   final ConnectionRepository repository;
   GetVibeConfig(this.repository);
 
-  Future<String?> call() => repository.getVibeConfig();
+  Future<String?> call(String username) => repository.getVibeConfig(username);
 }

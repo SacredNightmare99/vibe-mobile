@@ -8,8 +8,4 @@ class Project extends Equatable {
 
   @override
   List<Object?> get props => [name, path];
-
-  factory Project.fromJson(Map<String, dynamic> json) {
-    return Project(name: json['id'] as String, path: json['path'] as String);
-  }
 }

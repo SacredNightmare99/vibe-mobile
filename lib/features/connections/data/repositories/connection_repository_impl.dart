@@ -44,9 +44,12 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   }
 
   @override
-  Future<String?> getVibeConfig() async {
-    return await sshManager.readFile(
-      '/home/${sshManager.username}/.vibe/tracked.json',
-    );
+  Future<String?> getVibeConfig(String username) async {
+    return await sshManager.readFile('/home/$username/.vibe/tracked.json');
+  }
+
+  @override
+  String? getConnectedUsername() {
+    return sshManager.username;
   }
 }
