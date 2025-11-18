@@ -6,4 +6,3 @@ class GetConnectedUsername {
 
   String? call() => repository.getConnectedUsername();
 }
-

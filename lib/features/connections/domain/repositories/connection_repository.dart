@@ -1,10 +1,15 @@
+import 'package:dartz/dartz.dart';
+import 'package:vibe/core/error/failure.dart';
 import '../entities/connection.dart';
 
 abstract class ConnectionRepository {
   Future<List<Connection>> getAllConnections();
   Future<void> addConnection(Connection connection);
-  Future<bool> connect(Connection connection, {String? password});
+  Future<Either<Failure, bool>> connect(
+    Connection connection, {
+    String? password,
+  });
   Future<void> disconnect();
-  Future<String?> getVibeConfig(String username);
+  Future<Either<Failure, String>> getVibeConfig(String username);
   String? getConnectedUsername();
 }

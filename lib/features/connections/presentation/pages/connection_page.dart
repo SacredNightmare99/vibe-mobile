@@ -71,9 +71,9 @@ class _ConnectionPageState extends State<ConnectionPage> {
               if (state is ConnectionManagerLoaded) {
                 return ConnectionList(
                   connections: state.connections,
-                  onTap: (connection) => context
-                      .read<ConnectionAuthBloc>()
-                      .add(ShowPasswordPrompt(connection)),
+                  onTap: (connection) => context.read<ConnectionAuthBloc>().add(
+                    ShowPasswordPrompt(connection),
+                  ),
                 );
               }
               return const Center(child: Text('Loading...'));

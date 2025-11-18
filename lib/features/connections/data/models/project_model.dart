@@ -21,4 +21,3 @@ class ProjectModel extends Equatable {
   @override
   List<Object?> get props => [name, path];
 }
-

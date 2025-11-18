@@ -3,6 +3,9 @@ import 'package:vibe/core/network/ssh_manager.dart';
 import 'package:vibe/features/connections/data/models/connection_model.dart';
 import 'package:vibe/features/connections/domain/entities/connection.dart';
 import 'package:vibe/features/connections/domain/repositories/connection_repository.dart';
+import 'package:vibe/core/error/failure.dart';
+import 'package:vibe/core/error/exception.dart';
+import 'package:dartz/dartz.dart';
 
 class ConnectionRepositoryImpl implements ConnectionRepository {
   final SshManager sshManager;
@@ -24,7 +27,10 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   }
 
   @override
-  Future<bool> connect(Connection connection, {String? password}) async {
+  Future<Either<Failure, bool>> connect(
+    Connection connection, {
+    String? password,
+  }) async {
     try {
       await sshManager.connect(
         host: connection.host,
@@ -32,9 +38,11 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
         username: connection.username,
         password: password,
       );
-      return true;
+      return const Right(true);
+    } on SshException catch (e) {
+      return Left(SshFailure(message: e.message));
     } catch (e) {
-      return false;
+      return Left(SshFailure(message: e.toString()));
     }
   }
 
@@ -44,8 +52,17 @@ class ConnectionRepositoryImpl implements ConnectionRepository {
   }
 
   @override
-  Future<String?> getVibeConfig(String username) async {
-    return await sshManager.readFile('/home/$username/.vibe/tracked.json');
+  Future<Either<Failure, String>> getVibeConfig(String username) async {
+    try {
+      final configContent = await sshManager.readFile(
+        '/home/$username/.vibe/tracked.json',
+      );
+      return Right(configContent);
+    } on SshException catch (e) {
+      return Left(SshFailure(message: e.message));
+    } catch (e) {
+      return Left(SshFailure(message: e.toString()));
+    }
   }
 
   @override

@@ -43,66 +43,68 @@ class ConnectionAuthBloc
     Emitter<ConnectionAuthState> emit,
   ) async {
     emit(ConnectionAuthLoading());
-    final success = await _connectToSystem(
+    final connectionResult = await _connectToSystem(
       event.connection,
       password: event.password,
     );
 
-    if (success) {
-      final username = _getConnectedUsername();
-      if (username == null) {
-        await _disconnectFromSystem();
-        emit(
-          ConnectionAuthFailure(
-            'Failed to retrieve connected username. Disconnecting...',
-          ),
-        );
-        return;
-      }
-
-      String? configContent;
-      try {
-        configContent = await _getVibeConfig(username);
-      } catch (e) {
-        await _disconnectFromSystem();
-        emit(
-          ConnectionAuthFailure(
-            'Failed to read Vibe config: ${e.toString()}. Disconnecting...',
-          ),
-        );
-        return;
-      }
-
-      if (configContent == null) {
-        await _disconnectFromSystem();
-        emit(
-          ConnectionAuthFailure(
-            '`tracked.json` not found in Vibe config. Disconnecting...',
-          ),
-        );
-      } else {
-        try {
-          final Map<String, dynamic> data = json.decode(configContent);
-          final List<dynamic> projectsJson = data['projects'] ?? [];
-          final projects = projectsJson
-              .map(
-                (p) =>
-                    ProjectModel.fromJson(p as Map<String, dynamic>).toEntity(),
-              )
-              .toList();
-          emit(ProjectSelection(projects: projects));
-        } catch (e) {
+    await connectionResult.fold(
+      (failure) async {
+        emit(ConnectionAuthFailure(failure.message));
+      },
+      (success) async {
+        final username = _getConnectedUsername();
+        if (username == null) {
           await _disconnectFromSystem();
           emit(
-            ConnectionAuthFailure(
-              'Failed to parse vibe config (tracked.json): ${e.toString()}. Disconnecting...',
+            const ConnectionAuthFailure(
+              'Failed to retrieve connected username. Disconnecting...',
             ),
           );
+          return;
         }
-      }
-    } else {
-      emit(ConnectionAuthFailure('Connection Failed'));
-    }
+
+        final configContentResult = await _getVibeConfig(username);
+
+        await configContentResult.fold(
+          (failure) async {
+            await _disconnectFromSystem();
+            emit(ConnectionAuthFailure(failure.message));
+          },
+          (configContent) async {
+            if (configContent.isEmpty) {
+              // Assuming empty string means not found or invalid
+              await _disconnectFromSystem();
+              emit(
+                const ConnectionAuthFailure(
+                  '`tracked.json` not found in Vibe config or is empty. Disconnecting...',
+                ),
+              );
+            } else {
+              try {
+                final Map<String, dynamic> data = json.decode(configContent);
+                final List<dynamic> projectsJson = data['projects'] ?? [];
+                final projects = projectsJson
+                    .map(
+                      (p) => ProjectModel.fromJson(
+                        p as Map<String, dynamic>,
+                      ).toEntity(),
+                    )
+                    .toList();
+                emit(ProjectSelection(projects: projects));
+              } catch (e) {
+                await _disconnectFromSystem();
+                emit(
+                  ConnectionAuthFailure(
+                    'Failed to parse vibe config (tracked.json): ${e.toString()}. Disconnecting...',
+                  ),
+                );
+              }
+            }
+          },
+        );
+      },
+    );
   }
 
   Future<void> _onDisconnectFromSystemRequested(

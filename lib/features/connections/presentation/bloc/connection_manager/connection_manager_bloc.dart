@@ -7,14 +7,13 @@ import 'package:vibe/features/connections/domain/usecases/get_all_connections.da
 part 'connection_manager_event.dart';
 part 'connection_manager_state.dart';
 
-class ConnectionManagerBloc extends Bloc<ConnectionManagerEvent, ConnectionManagerState> {
+class ConnectionManagerBloc
+    extends Bloc<ConnectionManagerEvent, ConnectionManagerState> {
   final GetAllConnections _getAllConnections;
   final AddConnection _addConnection;
 
-  ConnectionManagerBloc(
-    this._getAllConnections,
-    this._addConnection,
-  ) : super(ConnectionManagerLoading()) {
+  ConnectionManagerBloc(this._getAllConnections, this._addConnection)
+    : super(ConnectionManagerLoading()) {
     on<LoadConnections>(_onLoadConnections);
     on<AddConnectionEvent>(_onAddConnection);
   }
